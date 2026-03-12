@@ -1,7 +1,9 @@
 import { Geist, Geist_Mono } from "next/font/google"
 
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@/components/theme/theme-provider"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { RPCProvider } from "@/lib/orpc/react"
 import { cn } from "@/lib/utils";
 
 const fontSans = Geist({
@@ -13,6 +15,8 @@ const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
 })
+
+import { Toaster } from "@/components/ui/sonner"
 
 export default function RootLayout({
   children,
@@ -26,7 +30,12 @@ export default function RootLayout({
       className={cn("antialiased", fontMono.variable, "font-sans", fontSans.variable)}
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <RPCProvider>
+          <ThemeProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+            <Toaster />
+          </ThemeProvider>
+        </RPCProvider>
       </body>
     </html>
   )

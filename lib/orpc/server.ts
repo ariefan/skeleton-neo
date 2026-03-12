@@ -1,0 +1,105 @@
+import { os } from "@orpc/server"
+import { z } from "zod"
+import { db } from "@/lib/db"
+import { books } from "@/lib/db/schema"
+import { eq, desc, asc, sql, like, or } from "drizzle-orm"
+
+export { os }
+
+export const router = os.router({
+  hello: os
+    .input(z.object({ name: z.string().optional() }))
+    .handler(async ({ input }) => {
+      return {
+        message: `Hello ${input.name ?? 'Ariefan'}! oRPC v1.x is officially alive.`,
+      }
+    }),
+
+  books: os.router({
+    list: os
+      .input(z.object({
+        limit: z.number().int().min(1).max(100).default(10),
+        offset: z.number().int().min(0).default(0),
+        search: z.string().optional(),
+        sortBy: z.enum(['id', 'title', 'author', 'publishedAt', 'createdAt']).default('createdAt'),
+        sortOrder: z.enum(['asc', 'desc']).default('desc'),
+      }))
+      .handler(async ({ input }) => {
+        const filters = input.search 
+          ? or(
+              like(books.title, `%${input.search}%`),
+              like(books.author, `%${input.search}%`)
+            )
+          : undefined
+
+        const [totalResult] = await db.select({ count: sql<number>`count(*)` })
+          .from(books)
+          .where(filters)
+
+        const orderBy = input.sortOrder === 'desc' 
+          ? desc(books[input.sortBy]) 
+          : asc(books[input.sortBy])
+
+        const rows = await db.select()
+          .from(books)
+          .where(filters)
+          .orderBy(orderBy)
+          .limit(input.limit)
+          .offset(input.offset)
+
+        return {
+          rows,
+          total: totalResult?.count ?? 0,
+        }
+      }),
+
+    get: os
+      .input(z.object({ id: z.number() }))
+      .handler(async ({ input }) => {
+        const [book] = await db.select().from(books).where(eq(books.id, input.id))
+        return book ?? null
+      }),
+
+    create: os
+      .input(z.object({
+        title: z.string().min(1),
+        author: z.string().min(1),
+        publishedAt: z.string().optional().nullable(),
+      }))
+      .handler(async ({ input }) => {
+        const [result] = await db.insert(books).values({
+          title: input.title,
+          author: input.author,
+          publishedAt: input.publishedAt ? new Date(input.publishedAt) : null,
+        })
+        return { id: (result as any).insertId }
+      }),
+
+    update: os
+      .input(z.object({
+        id: z.number(),
+        title: z.string().min(1),
+        author: z.string().min(1),
+        publishedAt: z.string().optional().nullable(),
+      }))
+      .handler(async ({ input }) => {
+        await db.update(books)
+          .set({
+            title: input.title,
+            author: input.author,
+            publishedAt: input.publishedAt ? new Date(input.publishedAt) : null,
+          })
+          .where(eq(books.id, input.id))
+        return { success: true }
+      }),
+
+    delete: os
+      .input(z.object({ id: z.number() }))
+      .handler(async ({ input }) => {
+        await db.delete(books).where(eq(books.id, input.id))
+        return { success: true }
+      }),
+  }),
+})
+
+export type AppRouter = typeof router
