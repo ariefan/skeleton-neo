@@ -24,7 +24,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { ChevronsUpDownIcon, SparklesIcon, BadgeCheckIcon, CreditCardIcon, BellIcon, LogOutIcon, Moon, Sun } from "lucide-react"
+import { ChevronsUpDownIcon, CreditCardIcon, LogOutIcon, Moon, Sun, SettingsIcon, ShieldIcon, UserIcon } from "lucide-react"
 import { useTheme } from "next-themes"
 
 export function NavUser({
@@ -94,14 +94,6 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <SparklesIcon
-                />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
               <DropdownMenuItem onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}>
                 <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                 <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
@@ -110,19 +102,32 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheckIcon />
-                Account
+              <DropdownMenuItem asChild>
+                <a href="/settings/account">
+                  <UserIcon className="h-4 w-4" />
+                  Profile
+                </a>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCardIcon
-                />
-                Billing
+              <DropdownMenuItem asChild>
+                <a href="/settings/security">
+                  <ShieldIcon className="h-4 w-4" />
+                  Security
+                </a>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <BellIcon
-                />
-                Notifications
+              <DropdownMenuItem asChild>
+                <a href="/settings/organizations">
+                  <CreditCardIcon className="h-4 w-4" />
+                  Organizations
+                </a>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem asChild>
+                <a href="/settings">
+                  <SettingsIcon className="h-4 w-4" />
+                  Settings
+                </a>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

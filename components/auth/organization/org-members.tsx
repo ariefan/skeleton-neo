@@ -1,0 +1,282 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { authClient } from "@/lib/auth/client";
+import { Button } from "@/components/ui/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, UserPlus, Shield, UserX } from "lucide-react";
+import { toast } from "sonner";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+	Field,
+	FieldGroup,
+	FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+
+interface OrgMember {
+	id: string;
+	role: string;
+	user?: {
+		name: string;
+		email: string;
+	};
+}
+
+type OrgRole = "member" | "admin" | "owner";
+
+export function OrgMembers({ organizationId }: { organizationId: string }) {
+	const [members, setMembers] = useState<OrgMember[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [inviteOpen, setInviteOpen] = useState(false);
+	const [inviteEmail, setInviteEmail] = useState("");
+	const [inviteRole, setInviteRole] = useState<OrgRole>("member");
+	const [inviting, setInviting] = useState(false);
+
+	const fetchMembers = useCallback(async () => {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const res = await (authClient.organization as any).listMembers({
+			organizationId,
+		});
+		if (res.data) {
+			setMembers(res.data as OrgMember[]);
+		}
+		setLoading(false);
+	}, [organizationId]);
+
+	useEffect(() => {
+		fetchMembers();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [organizationId]);
+
+	const inviteMember = async () => {
+		setInviting(true);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const res = await (authClient.organization as any).inviteMember({
+			organizationId,
+			email: inviteEmail,
+			role: inviteRole,
+		});
+
+		if (res.error) {
+			toast.error(res.error.message || "Failed to invite member");
+		} else {
+			toast.success("Invitation sent!");
+			setInviteOpen(false);
+			setInviteEmail("");
+			fetchMembers();
+		}
+		setInviting(false);
+	};
+
+	const removeMember = async (memberId: string) => {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const res = await (authClient.organization as any).removeMember({
+			organizationId,
+			memberIdOrEmail: memberId,
+		});
+
+		if (res.error) {
+			toast.error(res.error.message || "Failed to remove member");
+		} else {
+			toast.success("Member removed");
+			fetchMembers();
+		}
+	};
+
+	const updateMemberRole = async (memberId: string, role: OrgRole) => {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const res = await (authClient.organization as any).updateMemberRole({
+			organizationId,
+			memberIdOrEmail: memberId,
+			role,
+		});
+
+		if (res.error) {
+			toast.error(res.error.message || "Failed to update role");
+		} else {
+			toast.success("Role updated");
+			fetchMembers();
+		}
+	};
+
+	const getInitials = (name: string) => {
+		return name
+			.split(" ")
+			.map((n) => n[0])
+			.join("")
+			.toUpperCase()
+			.slice(0, 2);
+	};
+
+	const getRoleBadge = (role: string) => {
+		const variants: Record<string, "default" | "secondary"> = {
+			owner: "default",
+			admin: "default",
+			member: "secondary",
+		};
+		return (
+			<Badge variant={variants[role] || "secondary"}>{role}</Badge>
+		);
+	};
+
+	return (
+		<Card>
+			<CardHeader>
+				<div className="flex items-center justify-between">
+					<div>
+						<CardTitle>Members</CardTitle>
+						<CardDescription>Manage organization members</CardDescription>
+					</div>
+					<Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+						<DialogTrigger asChild>
+							<Button size="sm">
+								<UserPlus className="mr-2 h-4 w-4" />
+								Invite
+							</Button>
+						</DialogTrigger>
+						<DialogContent>
+							<DialogHeader>
+								<DialogTitle>Invite Member</DialogTitle>
+								<DialogDescription>
+									Send an invitation to join this organization
+								</DialogDescription>
+							</DialogHeader>
+							<FieldGroup>
+								<Field>
+									<FieldLabel>Email</FieldLabel>
+									<Input
+										type="email"
+										placeholder="colleague@example.com"
+										value={inviteEmail}
+										onChange={(e) => setInviteEmail(e.target.value)}
+									/>
+								</Field>
+								<Field>
+									<FieldLabel>Role</FieldLabel>
+									<Select value={inviteRole} onValueChange={(v) => setInviteRole(v as OrgRole)}>
+										<SelectTrigger>
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="member">Member</SelectItem>
+											<SelectItem value="admin">Admin</SelectItem>
+										</SelectContent>
+									</Select>
+								</Field>
+								<Button onClick={inviteMember} disabled={inviting}>
+									{inviting ? "Sending..." : "Send Invite"}
+								</Button>
+							</FieldGroup>
+						</DialogContent>
+					</Dialog>
+				</div>
+			</CardHeader>
+			<CardContent>
+				{loading ? (
+					<p>Loading members...</p>
+				) : members.length === 0 ? (
+					<p className="text-muted-foreground text-sm">No members yet</p>
+				) : (
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead>Member</TableHead>
+								<TableHead>Role</TableHead>
+								<TableHead className="text-right">Actions</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{members.map((member) => (
+								<TableRow key={member.id}>
+									<TableCell>
+										<div className="flex items-center gap-3">
+											<Avatar>
+												<AvatarFallback>
+													{getInitials(member.user?.name || "U")}
+												</AvatarFallback>
+											</Avatar>
+											<div>
+												<div className="font-medium">{member.user?.name}</div>
+												<div className="text-sm text-muted-foreground">
+													{member.user?.email}
+												</div>
+											</div>
+										</div>
+									</TableCell>
+									<TableCell>{getRoleBadge(member.role)}</TableCell>
+									<TableCell className="text-right">
+										<DropdownMenu>
+											<DropdownMenuTrigger asChild>
+												<Button variant="ghost" size="sm">
+													<MoreHorizontal className="h-4 w-4" />
+												</Button>
+											</DropdownMenuTrigger>
+											<DropdownMenuContent align="end">
+												<DropdownMenuItem
+													onClick={() => updateMemberRole(member.id, "admin")}
+												>
+													<Shield className="mr-2 h-4 w-4" />
+													Make Admin
+												</DropdownMenuItem>
+												<DropdownMenuItem
+													onClick={() => updateMemberRole(member.id, "member")}
+												>
+													<UserPlus className="mr-2 h-4 w-4" />
+													Make Member
+												</DropdownMenuItem>
+												<DropdownMenuItem
+													className="text-destructive"
+													onClick={() => removeMember(member.id)}
+												>
+													<UserX className="mr-2 h-4 w-4" />
+													Remove
+												</DropdownMenuItem>
+											</DropdownMenuContent>
+										</DropdownMenu>
+									</TableCell>
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				)}
+			</CardContent>
+		</Card>
+	);
+}

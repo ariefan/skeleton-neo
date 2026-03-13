@@ -10,7 +10,7 @@ if (!process.env.DATABASE_URL) {
 
 export default defineConfig({
   schema: "./lib/db/schema/index.ts",
-  out: "./drizzle",
+  out: "./lib/db/migration",
   dialect: "mysql",
   dbCredentials: {
     url: process.env.DATABASE_URL,

@@ -48,7 +48,8 @@ function InputOTPSlot({
   index: number
 }) {
   const inputOTPContext = React.useContext(OTPInputContext)
-  const { char, hasFakeCaret, isActive } = inputOTPContext?.slots[index] ?? {}
+  const slotData = inputOTPContext?.slots?.[index];
+	const { char, hasFakeCaret, isActive } = slotData ?? { char: null, hasFakeCaret: false, isActive: false }
 
   return (
     <div

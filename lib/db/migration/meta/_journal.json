@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1773345083459,
+      "tag": "0000_perfect_zemo",
+      "breakpoints": true
+    }
+  ]
+}

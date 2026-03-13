@@ -8,7 +8,22 @@
       "Bash(npm search:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "WebSearch",
+      "Bash(ls:*)",
+      "Bash(npm run auth:generate:*)",
+      "Bash(dir:*)",
+      "Bash(npm run db:generate:*)",
+      "Bash(npm run db:push:*)",
+      "Bash(mysql:*)",
+      "Bash(tsx:*)",
+      "Bash(npm run db:migrate:*)",
+      "Bash(npx drizzle-kit migrate:*)",
+      "Bash(npx drizzle-kit generate:*)",
+      "Bash(npx drizzle-kit push:*)",
+      "Bash(del:*)",
+      "Bash(test:*)",
+      "Bash(npx eslint:*)"
     ]
   }
 }
