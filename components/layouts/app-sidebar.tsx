@@ -136,32 +136,6 @@ const data = {
         },
       ],
     },
-    {
-      title: "Settings",
-      url: "/settings",
-      icon: (
-        <Settings2Icon
-        />
-      ),
-      items: [
-        {
-          title: "Account",
-          url: "/settings/account",
-        },
-        {
-          title: "Security",
-          url: "/settings/security",
-        },
-        {
-          title: "Organizations",
-          url: "/settings/organizations",
-        },
-        {
-          title: "Notifications",
-          url: "/settings/notifications",
-        },
-      ],
-    },
   ],
   projects: [
     {

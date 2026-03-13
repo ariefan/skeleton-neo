@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { authClient } from "@/lib/auth/client"
 import { toast } from "sonner"
@@ -103,31 +104,31 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <a href="/settings/account">
+                <Link href="/settings/account">
                   <UserIcon className="h-4 w-4" />
                   Profile
-                </a>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <a href="/settings/security">
+                <Link href="/settings/security">
                   <ShieldIcon className="h-4 w-4" />
                   Security
-                </a>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <a href="/settings/organizations">
+                <Link href="/settings/organizations">
                   <CreditCardIcon className="h-4 w-4" />
                   Organizations
-                </a>
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <a href="/settings">
+                <Link href="/settings">
                   <SettingsIcon className="h-4 w-4" />
                   Settings
-                </a>
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
