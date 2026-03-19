@@ -15,7 +15,9 @@
     "db:studio": "drizzle-kit studio",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx lib/db/seed/index.ts",
-    "auth:generate": "tsx scripts/generate-auth.ts"
+    "auth:generate": "tsx scripts/generate-auth.ts",
+    "backup:now": "tsx scripts/backup-manual.ts",
+    "backup:daemon": "tsx scripts/backup-runner.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",
@@ -28,6 +30,7 @@
     "@scalar/api-reference-react": "^0.9.6",
     "@simplewebauthn/browser": "^13.3.0",
     "@tanstack/react-query": "^5.90.21",
+    "archiver": "^7.0.1",
     "better-auth": "^1.5.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -41,6 +44,7 @@
     "mysql2": "^3.19.1",
     "next": "16.2.0",
     "next-themes": "^0.4.6",
+    "node-cron": "^4.2.1",
     "qrcode": "^1.5.4",
     "qrcode.react": "^4.2.0",
     "radix-ui": "^1.4.3",
@@ -62,7 +66,9 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4.1.18",
+    "@types/archiver": "^7.0.0",
     "@types/node": "^25.1.0",
+    "@types/node-cron": "^3.0.11",
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
     "drizzle-kit": "^0.31.9",

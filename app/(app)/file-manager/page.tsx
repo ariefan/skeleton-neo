@@ -89,7 +89,7 @@ export default function FileManagerPage() {
 	}))
 
 	const isLoading = listQuery.isLoading || statsQuery.isLoading
-	const items = listQuery.data ?? []
+	const items = (listQuery.data ?? []).filter(item => !item.name.startsWith("."))
 	const stats = statsQuery.data ?? { totalSize: 0, fileCount: 0, limit: 100 * 1024 * 1024 * 1024 }
 
 	const handleRefresh = () => {

@@ -7,6 +7,13 @@ import { auth } from "@/lib/auth"
 
 import { createNotification } from "@/lib/services/notifications"
 import { StorageService } from "@/lib/services/storage"
+import {
+	performBackup,
+	listBackups,
+	generateBackupFilename,
+} from "@/lib/services/backup"
+import * as fs from "fs/promises"
+import * as path from "path"
 
 export const os = osBase.$context<{ 
   session: typeof auth.$Infer.Session | null 
@@ -352,6 +359,89 @@ export const router = os.router({
         const movedPaths = await StorageService.moveToUploads(input.tempPaths)
         await StorageService.cleanupTemp()
         return { movedPaths }
+      }),
+  }),
+
+  backups: os.router({
+    getConfig: os
+      .handler(async ({ context }) => {
+        if (!context.session?.user) {
+          throw new Error("Unauthorized")
+        }
+
+        return {
+          enabled: process.env.BACKUP_ENABLED !== "false",
+          retentionDays: parseInt(process.env.BACKUP_RETENTION_DAYS || "30", 10),
+          schedule: process.env.BACKUP_SCHEDULE || "0 2 * * *",
+          runOnStart: process.env.BACKUP_RUN_ON_START === "true",
+          backupDir: process.env.BACKUP_DIR || path.join(process.cwd(), "backups"),
+        }
+      }),
+
+    list: os
+      .input(z.object({
+        limit: z.number().int().min(1).max(100).default(20),
+        offset: z.number().int().min(0).default(0),
+      }))
+      .handler(async ({ input, context }) => {
+        if (!context.session?.user) {
+          throw new Error("Unauthorized")
+        }
+
+        const allBackups = await listBackups()
+        const total = allBackups.length
+        const rows = allBackups.slice(input.offset, input.offset + input.limit)
+
+        return {
+          rows,
+          total,
+        }
+      }),
+
+    create: os
+      .handler(async ({ context }) => {
+        if (!context.session?.user) {
+          throw new Error("Unauthorized")
+        }
+
+        const result = await performBackup({
+          onProgress: () => {},
+        })
+
+        if (!result.success) {
+          throw new Error(result.error ?? "Backup failed")
+        }
+
+        return {
+          success: true,
+          backupPath: result.backupPath,
+          size: result.size,
+          duration: result.duration,
+        }
+      }),
+
+    delete: os
+      .input(z.object({ filename: z.string() }))
+      .handler(async ({ input, context }) => {
+        if (!context.session?.user) {
+          throw new Error("Unauthorized")
+        }
+
+        const backupDir = process.env.BACKUP_DIR || path.join(process.cwd(), "backups")
+        const filePath = path.join(backupDir, input.filename)
+
+        // Security check: ensure filename is just a filename, not a path
+        if (input.filename.includes("..") || input.filename.includes("/") || input.filename.includes("\\")) {
+          throw new Error("Invalid filename")
+        }
+
+        try {
+          await fs.unlink(filePath)
+        } catch (e) {
+          throw new Error("Failed to delete backup")
+        }
+
+        return { success: true }
       }),
   }),
 })
