@@ -35,6 +35,7 @@ import { pelayananRouter } from "./routers/pelayanan"
 import { dashboardRouter } from "./routers/dashboard"
 import { tunggakanRouter } from "./routers/tunggakan"
 import { updateMasalRouter } from "./routers/update-masal"
+import { pemekaranRouter } from "./routers/pemekaran"
 
 export const router = os.router({
   hello: os
@@ -63,6 +64,7 @@ export const router = os.router({
   dashboard: dashboardRouter,
   tunggakan: tunggakanRouter,
   updateMasal: updateMasalRouter,
+  pemekaran: pemekaranRouter,
 
   notifications: os.router({
     list: os
