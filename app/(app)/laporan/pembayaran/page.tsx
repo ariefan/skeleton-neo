@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useORPC } from '@/lib/orpc/react'
 import { DataTable } from '@/components/data-table/data-table'
 import { type ColumnDef } from '@tanstack/react-table'
@@ -15,6 +15,8 @@ import {
 } from '@/components/ui/select'
 import { formatRupiah, formatTanggal } from '@/components/data-table/column-helpers'
 import { CreditCard } from 'lucide-react'
+import { ExcelExportButton } from '@/components/export/excel-export-button'
+import { formatNop } from '@/lib/utils/nop'
 
 type Row = {
   kdPropinsi: string; kdDati2: string; kdKecamatan: string; kdKelurahan: string
@@ -33,10 +35,21 @@ const columns: ColumnDef<Row>[] = [
   { accessorKey: 'namaBayar', header: 'Pembayar', cell: ({ row }) => row.original.namaBayar ?? '-' },
 ]
 
+const EXCEL_COLUMNS = [
+  { header: 'NOP', key: 'nop', width: 24 },
+  { header: 'Tahun Pajak', key: 'thnPajakSppt', width: 12 },
+  { header: 'Tanggal Bayar', key: 'tglPembayaranSppt', width: 16, style: 'date' as const },
+  { header: 'PBB Pokok (Rp)', key: 'jmlSpptYgDibayar', width: 18, style: 'currency' as const },
+  { header: 'Denda (Rp)', key: 'dendaSppt', width: 16, style: 'currency' as const },
+  { header: 'Total Bayar (Rp)', key: 'jmlBayar', width: 18, style: 'currency' as const },
+  { header: 'Nama Pembayar', key: 'namaBayar', width: 24 },
+]
+
 const PAGE_SIZE = 50
 
 export default function LaporanPembayaranPage() {
   const orpc = useORPC()
+  const qc = useQueryClient()
   const currentYear = new Date().getFullYear()
   const [page, setPage] = React.useState(1)
   const [thnPajak, setThnPajak] = React.useState(currentYear)
@@ -47,21 +60,45 @@ export default function LaporanPembayaranPage() {
     }),
   )
 
+  async function getExportRows() {
+    const result = await qc.fetchQuery(
+      orpc.pembayaran.list.queryOptions({ input: { limit: 9999, offset: 0, thnPajak } }),
+    )
+    return (result.rows as Row[]).map((r) => ({
+      nop: formatNop(r),
+      thnPajakSppt: r.thnPajakSppt,
+      tglPembayaranSppt: r.tglPembayaranSppt ? new Date(r.tglPembayaranSppt as string) : null,
+      jmlSpptYgDibayar: Number(r.jmlSpptYgDibayar),
+      dendaSppt: Number(r.dendaSppt),
+      jmlBayar: Number(r.jmlBayar),
+      namaBayar: r.namaBayar ?? '',
+    }))
+  }
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="space-y-1">
           <h1 className="text-2xl font-bold tracking-tight">Laporan Pembayaran</h1>
           <p className="text-muted-foreground">Rincian pembayaran PBB per periode</p>
         </div>
-        <Select value={String(thnPajak)} onValueChange={(v) => { setThnPajak(parseInt(v)); setPage(1) }}>
-          <SelectTrigger className="w-[120px]"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {Array.from({ length: 10 }, (_, i) => currentYear - i).map((y) => (
-              <SelectItem key={y} value={String(y)}>{y}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex gap-2 flex-wrap">
+          <Select value={String(thnPajak)} onValueChange={(v) => { setThnPajak(parseInt(v)); setPage(1) }}>
+            <SelectTrigger className="w-[120px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: 10 }, (_, i) => currentYear - i).map((y) => (
+                <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <ExcelExportButton
+            filename={`Laporan_Pembayaran_${thnPajak}`}
+            title={`LAPORAN PEMBAYARAN PBB TAHUN ${thnPajak}`}
+            columns={EXCEL_COLUMNS}
+            getRows={getExportRows}
+            label="Export Excel"
+          />
+        </div>
       </div>
       <DataTable
         columns={columns}
