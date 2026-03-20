@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useORPC } from '@/lib/orpc/react'
-import { parseNop } from '@/lib/utils/nop'
+import { parseNop, NopParts } from '@/lib/utils/nop'
 import { NopDisplay } from '@/components/nop/nop-display'
 import { CurrencyInput } from '@/components/forms/currency-input'
 import { Button } from '@/components/ui/button'
@@ -154,6 +154,113 @@ function SelectField({
         </SelectContent>
       </Select>
     </div>
+  )
+}
+
+function FasilitasBangunanCard({
+  nopParts,
+  noBng,
+}: {
+  nopParts: NopParts
+  noBng: number
+}) {
+  const orpc = useORPC()
+  const qc = useQueryClient()
+
+  const masterQuery = useQuery(
+    orpc.klasifikasi.listFasilitas.queryOptions(),
+  )
+
+  const existingQuery = useQuery(
+    orpc.lspop.listFasilitas.queryOptions({
+      input: { ...nopParts, noBng },
+    }),
+  )
+
+  const [quantities, setQuantities] = React.useState<Record<string, number>>({})
+  const [initialized, setInitialized] = React.useState(false)
+
+  React.useEffect(() => {
+    if (!existingQuery.data || initialized) return
+    const map: Record<string, number> = {}
+    for (const item of existingQuery.data) {
+      map[item.kdFasilitas] = item.jmlSatuan
+    }
+    setQuantities(map)
+    setInitialized(true)
+  }, [existingQuery.data, initialized])
+
+  const setFasilitasMutation = useMutation(
+    orpc.lspop.setFasilitas.mutationOptions({
+      onSuccess: () => {
+        qc.invalidateQueries({ queryKey: ['lspop'] })
+      },
+    }),
+  )
+
+  function handleSimpanFasilitas() {
+    const fasilitas = Object.entries(quantities)
+      .filter(([, jml]) => jml > 0)
+      .map(([kdFasilitas, jmlSatuan]) => ({ kdFasilitas, jmlSatuan }))
+    setFasilitasMutation.mutate({ ...nopParts, noBng, fasilitas })
+  }
+
+  const isLoading = masterQuery.isLoading || existingQuery.isLoading
+  const master = masterQuery.data ?? []
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">Fasilitas Bangunan</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {isLoading ? (
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
+          </div>
+        ) : master.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Tidak ada data fasilitas master.</p>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {master.map((fas) => (
+                <div key={fas.kdFasilitas} className="flex items-center gap-3 rounded-md border px-3 py-2">
+                  <div className="flex-1 min-w-0">
+                    <Label className="text-xs text-muted-foreground font-mono">{fas.kdFasilitas}</Label>
+                    <div className="text-sm font-medium truncate">{fas.nmFasilitas}</div>
+                    <div className="text-xs text-muted-foreground">{fas.satuanFasilitas}</div>
+                  </div>
+                  <Input
+                    type="number"
+                    min={0}
+                    className="w-20 text-right"
+                    value={quantities[fas.kdFasilitas] ?? 0}
+                    onChange={(e) =>
+                      setQuantities((prev) => ({
+                        ...prev,
+                        [fas.kdFasilitas]: Number(e.target.value),
+                      }))
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+            {setFasilitasMutation.error && (
+              <p className="text-sm text-destructive">{String(setFasilitasMutation.error)}</p>
+            )}
+            <Button
+              type="button"
+              size="sm"
+              disabled={setFasilitasMutation.isPending}
+              onClick={handleSimpanFasilitas}
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {setFasilitasMutation.isPending ? 'Menyimpan...' : 'Simpan Fasilitas'}
+            </Button>
+          </>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 
@@ -402,6 +509,11 @@ export default function LspopBangunanPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Fasilitas Bangunan */}
+      {!isNew && (
+        <FasilitasBangunanCard nopParts={nopParts} noBng={noBng} />
+      )}
 
       {/* Actions */}
       <div className="flex gap-3">
