@@ -20,6 +20,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Loader2 } from 'lucide-react'
+import { ExcelExportButton } from '@/components/export/excel-export-button'
 
 export default function LaporanTunggakanPage() {
   const orpc = useORPC()
@@ -30,9 +31,26 @@ export default function LaporanTunggakanPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight">Laporan Tunggakan</h1>
-        <p className="text-muted-foreground">Rekapitulasi tunggakan per tahun pajak</p>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight">Laporan Tunggakan</h1>
+          <p className="text-muted-foreground">Rekapitulasi tunggakan per tahun pajak</p>
+        </div>
+        <ExcelExportButton
+          filename="Laporan_Tunggakan"
+          title="LAPORAN TUNGGAKAN PBB PER TAHUN"
+          columns={[
+            { header: 'Tahun Pajak', key: 'thnPajak', width: 14 },
+            { header: 'Jumlah SPPT', key: 'jumlahSppt', width: 14, style: 'number' },
+            { header: 'Total Tunggakan (Rp)', key: 'totalTunggakan', width: 22, style: 'currency' },
+          ]}
+          getRows={() => (summaryQuery.data ?? []).map((r) => ({
+            thnPajak: r.thnPajak,
+            jumlahSppt: r.jumlahSppt,
+            totalTunggakan: Number(r.totalTunggakan),
+          }))}
+          label="Export Excel"
+        />
       </div>
 
       <div className="rounded-md border bg-card overflow-hidden">
