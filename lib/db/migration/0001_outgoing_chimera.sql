@@ -19,7 +19,7 @@ CREATE TABLE `notification_preferences` (
 	`warning_enabled` boolean NOT NULL DEFAULT true,
 	`error_enabled` boolean NOT NULL DEFAULT true,
 	`info_enabled` boolean NOT NULL DEFAULT true,
-	`updated_at` timestamp(3) NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	`updated_at` timestamp(3) NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP(3),
 	CONSTRAINT `notification_preferences_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint

@@ -115,7 +115,7 @@ export const datFasilitasBangunan = mysqlTable(
   "dat_fasilitas_bangunan",
   {
     ...nopColumns(),
-    noBng: smallint("NO_BNG").notNull(),
+    noBng: int("NO_BNG").notNull(),
     kdFasilitas: char("KD_FASILITAS", { length: 2 }).notNull(),
     jmlSatuan: bigint("JML_SATUAN", { mode: "number" }).notNull().default(0),
   },
