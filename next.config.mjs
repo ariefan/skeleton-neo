@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import withSerwistInit from "@serwist/next";
 
 /** @type {import('next').NextConfig} */
@@ -12,3 +13,9 @@ const withSerwist = withSerwistInit({
 });
 
 export default withSerwist(nextConfig);
+=======
+/** @type {import('next').NextConfig} */
+const nextConfig = {}
+
+export default nextConfig
+>>>>>>> origin/main

@@ -29,7 +29,10 @@
     "@orpc/server": "^1.13.6",
     "@orpc/zod": "^1.13.6",
     "@scalar/api-reference-react": "^0.9.6",
+<<<<<<< HEAD
     "@serwist/next": "^9.5.7",
+=======
+>>>>>>> origin/main
     "@simplewebauthn/browser": "^13.3.0",
     "@tanstack/react-query": "^5.90.21",
     "archiver": "^7.0.1",
@@ -47,7 +50,10 @@
     "next-themes": "^0.4.6",
     "node-cron": "^4.2.1",
     "pg": "^8.20.0",
+<<<<<<< HEAD
     "postgres": "^3.4.9",
+=======
+>>>>>>> origin/main
     "qrcode": "^1.5.4",
     "qrcode.react": "^4.2.0",
     "radix-ui": "^1.4.3",
@@ -59,7 +65,10 @@
     "react-qr-code": "^2.0.18",
     "react-resizable-panels": "^4.7.2",
     "recharts": "^2.15.4",
+<<<<<<< HEAD
     "serwist": "^9.5.7",
+=======
+>>>>>>> origin/main
     "shadcn": "^4.0.5",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",

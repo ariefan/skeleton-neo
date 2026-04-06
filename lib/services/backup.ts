@@ -42,18 +42,29 @@ const UPLOADS_DIR = path.join(process.cwd(), "uploads")
 /**
  * Parse DATABASE_URL into connection config.
  *
+<<<<<<< HEAD
  * Expected format: postgres://user:password@host:port/database
+=======
+ * Expected format: mysql://user:password@host:port/database
+>>>>>>> origin/main
  *
  * Fun fact: URL parsing is a minefield of edge cases.
  */
 export function parseDatabaseUrl(url: string): DatabaseConnectionConfig {
 	try {
+<<<<<<< HEAD
 		// Handle postgres:// or postgresql:// prefix
 		let connectionString = url
 		if (connectionString.startsWith("postgres://")) {
 			connectionString = connectionString.substring(11)
 		} else if (connectionString.startsWith("postgresql://")) {
 			connectionString = connectionString.substring(13)
+=======
+		// Handle mysql:// prefix
+		let connectionString = url
+		if (connectionString.startsWith("mysql://")) {
+			connectionString = connectionString.substring(8)
+>>>>>>> origin/main
 		}
 
 		// Extract auth and host parts
@@ -87,7 +98,11 @@ export function parseDatabaseUrl(url: string): DatabaseConnectionConfig {
 		// Split host:port
 		const portColonPos = hostPortPart.indexOf(":")
 		let host = hostPortPart
+<<<<<<< HEAD
 		let port = 5432 // PostgreSQL default
+=======
+		let port = 3306 // MySQL default
+>>>>>>> origin/main
 
 		if (portColonPos !== -1) {
 			host = hostPortPart.substring(0, portColonPos)
@@ -101,9 +116,15 @@ export function parseDatabaseUrl(url: string): DatabaseConnectionConfig {
 }
 
 /**
+<<<<<<< HEAD
  * Create a database dump using pg_dump.
  *
  * Note: Uses --clean to clean database objects before creating them.
+=======
+ * Create a database dump using mysqldump.
+ *
+ * Note: Uses --no-create-db to avoid CREATE DATABASE syntax in the dump.
+>>>>>>> origin/main
  * This allows restoring to any existing database.
  *
  * @param config - Database connection configuration
@@ -135,13 +156,18 @@ export async function createDatabaseDump(
 }
 
 /**
+<<<<<<< HEAD
  * Execute pg_dump command.
+=======
+ * Execute mysqldump command.
+>>>>>>> origin/main
  */
 async function executeWithRetry(
 	config: DatabaseConnectionConfig,
 	outputPath: string,
 	attempt: number
 ): Promise<void> {
+<<<<<<< HEAD
 	// Get pg_dump path from env or use Linux default
 	const pgdumpPath = process.env.PGDUMP_PATH || "/usr/bin/pg_dump"
 
@@ -159,11 +185,33 @@ async function executeWithRetry(
 				...process.env,
 				PGPASSWORD: config.password,
 			},
+=======
+	// Get mysqldump path from env or use Linux default
+	const mysqldumpPath = process.env.MYSQLDUMP_PATH || "/usr/bin/mysqldump"
+
+	const args = [
+		`-h${config.host}`,
+		`-P${config.port}`,
+		`-u${config.user}`,
+		`-p${config.password}`,
+		"--no-create-db",
+		"--single-transaction",
+		"--quick",
+		"--lock-tables=false",
+		config.database
+	]
+
+	return new Promise<void>((resolve, reject) => {
+		const mysqldump = spawn(mysqldumpPath, args, {
+			stdio: ["ignore", "pipe", "pipe"],
+			shell: false,
+>>>>>>> origin/main
 		})
 
 		const writeStream = fsSync.createWriteStream(outputPath)
 		let stderr = ""
 
+<<<<<<< HEAD
 		pgdump.stdout?.pipe(writeStream)
 
 		pgdump.stderr?.on("data", (data) => {
@@ -171,10 +219,20 @@ async function executeWithRetry(
 		})
 
 		pgdump.on("close", (code) => {
+=======
+		mysqldump.stdout?.pipe(writeStream)
+
+		mysqldump.stderr?.on("data", (data) => {
+			stderr += data.toString()
+		})
+
+		mysqldump.on("close", (code) => {
+>>>>>>> origin/main
 			writeStream.close()
 			if (code === 0) {
 				resolve()
 			} else {
+<<<<<<< HEAD
 				reject(new Error(`pg_dump exited with code ${code}: ${stderr || "unknown error"}`))
 			}
 		})
@@ -182,6 +240,15 @@ async function executeWithRetry(
 		pgdump.on("error", (err) => {
 			writeStream.close()
 			reject(new Error(`Failed to spawn pg_dump: ${err.message}`))
+=======
+				reject(new Error(`mysqldump exited with code ${code}: ${stderr || "unknown error"}`))
+			}
+		})
+
+		mysqldump.on("error", (err) => {
+			writeStream.close()
+			reject(new Error(`Failed to spawn mysqldump: ${err.message}`))
+>>>>>>> origin/main
 		})
 	})
 }
