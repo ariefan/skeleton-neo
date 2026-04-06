@@ -42,16 +42,18 @@ const UPLOADS_DIR = path.join(process.cwd(), "uploads")
 /**
  * Parse DATABASE_URL into connection config.
  *
- * Expected format: mysql://user:password@host:port/database
+ * Expected format: postgres://user:password@host:port/database
  *
  * Fun fact: URL parsing is a minefield of edge cases.
  */
 export function parseDatabaseUrl(url: string): DatabaseConnectionConfig {
 	try {
-		// Handle mysql:// prefix
+		// Handle postgres:// or postgresql:// prefix
 		let connectionString = url
-		if (connectionString.startsWith("mysql://")) {
-			connectionString = connectionString.substring(8)
+		if (connectionString.startsWith("postgres://")) {
+			connectionString = connectionString.substring(11)
+		} else if (connectionString.startsWith("postgresql://")) {
+			connectionString = connectionString.substring(13)
 		}
 
 		// Extract auth and host parts
@@ -85,7 +87,7 @@ export function parseDatabaseUrl(url: string): DatabaseConnectionConfig {
 		// Split host:port
 		const portColonPos = hostPortPart.indexOf(":")
 		let host = hostPortPart
-		let port = 3306 // MySQL default
+		let port = 5432 // PostgreSQL default
 
 		if (portColonPos !== -1) {
 			host = hostPortPart.substring(0, portColonPos)
@@ -99,9 +101,9 @@ export function parseDatabaseUrl(url: string): DatabaseConnectionConfig {
 }
 
 /**
- * Create a database dump using mysqldump.
+ * Create a database dump using pg_dump.
  *
- * Note: Uses --no-create-db to avoid CREATE DATABASE syntax in the dump.
+ * Note: Uses --clean to clean database objects before creating them.
  * This allows restoring to any existing database.
  *
  * @param config - Database connection configuration
@@ -133,49 +135,53 @@ export async function createDatabaseDump(
 }
 
 /**
- * Execute mysqldump command.
+ * Execute pg_dump command.
  */
 async function executeWithRetry(
 	config: DatabaseConnectionConfig,
 	outputPath: string,
 	attempt: number
 ): Promise<void> {
-	// Get mysqldump path from env or use Linux default
-	const mysqldumpPath = process.env.MYSQLDUMP_PATH || "/usr/bin/mysqldump"
+	// Get pg_dump path from env or use Linux default
+	const pgdumpPath = process.env.PGDUMP_PATH || "/usr/bin/pg_dump"
 
 	// Build command as a single string for shell execution (needed for Windows paths with spaces)
 	// Quote the path in case it contains spaces
-	const quotedPath = `"${mysqldumpPath}"`
-	const argsString = `-h${config.host} -P${config.port} -u${config.user} -p${config.password} --no-create-db --single-transaction --quick --lock-tables=false ${config.database}`
+	const quotedPath = `"${pgdumpPath}"`
+	const argsString = `-h ${config.host} -p ${config.port} -U ${config.user} --clean --no-owner --no-privileges ${config.database}`
 	const command = `${quotedPath} ${argsString}`
 
 	return new Promise<void>((resolve, reject) => {
-		const mysqldump = spawn(command, {
+		const pgdump = spawn(command, {
 			stdio: ["ignore", "pipe", "pipe"],
 			shell: true,
+			env: {
+				...process.env,
+				PGPASSWORD: config.password,
+			},
 		})
 
 		const writeStream = fsSync.createWriteStream(outputPath)
 		let stderr = ""
 
-		mysqldump.stdout?.pipe(writeStream)
+		pgdump.stdout?.pipe(writeStream)
 
-		mysqldump.stderr?.on("data", (data) => {
+		pgdump.stderr?.on("data", (data) => {
 			stderr += data.toString()
 		})
 
-		mysqldump.on("close", (code) => {
+		pgdump.on("close", (code) => {
 			writeStream.close()
 			if (code === 0) {
 				resolve()
 			} else {
-				reject(new Error(`mysqldump exited with code ${code}: ${stderr || "unknown error"}`))
+				reject(new Error(`pg_dump exited with code ${code}: ${stderr || "unknown error"}`))
 			}
 		})
 
-		mysqldump.on("error", (err) => {
+		pgdump.on("error", (err) => {
 			writeStream.close()
-			reject(new Error(`Failed to spawn mysqldump: ${err.message}`))
+			reject(new Error(`Failed to spawn pg_dump: ${err.message}`))
 		})
 	})
 }

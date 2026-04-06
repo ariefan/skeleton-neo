@@ -18,6 +18,14 @@ const fontMono = Geist_Mono({
 
 import { Toaster } from "@/components/ui/sonner"
 
+export const metadata = {
+  manifest: "/manifest.json",
+}
+
+export const viewport = {
+  themeColor: "#000000",
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
