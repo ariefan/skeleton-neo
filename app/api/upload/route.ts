@@ -16,11 +16,9 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: "No files uploaded" }, { status: 400 })
 		}
 
-		const results = []
-		for (const file of files) {
-			const result = await StorageService.saveTemp(file)
-			results.push(result)
-		}
+		const results = await Promise.all(
+			files.map((file) => StorageService.saveTemp(file))
+		)
 
 		return NextResponse.json(results)
 	} catch (error) {
