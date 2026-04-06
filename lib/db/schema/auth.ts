@@ -1,22 +1,22 @@
 import { relations } from "drizzle-orm";
 import {
-  mysqlTable,
+  pgTable,
   varchar,
   text,
   timestamp,
   boolean,
   index,
   uniqueIndex,
-} from "drizzle-orm/mysql-core";
+} from "drizzle-orm/pg-core";
 
-export const user = mysqlTable("user", {
+export const user = pgTable("user", {
   id: varchar("id", { length: 36 }).primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
-  createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
-  updatedAt: timestamp("updated_at", { fsp: 3 })
+  createdAt: timestamp("created_at", { mode: "date", precision: 3 }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date", precision: 3 })
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
@@ -28,18 +28,18 @@ export const user = mysqlTable("user", {
   role: text("role"),
   banned: boolean("banned").default(false),
   banReason: text("ban_reason"),
-  banExpires: timestamp("ban_expires", { fsp: 3 }),
+  banExpires: timestamp("ban_expires", { mode: "date", precision: 3 }),
   isAnonymous: boolean("is_anonymous").default(false),
 });
 
-export const session = mysqlTable(
+export const session = pgTable(
   "session",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
-    expiresAt: timestamp("expires_at", { fsp: 3 }).notNull(),
+    expiresAt: timestamp("expires_at", { mode: "date", precision: 3 }).notNull(),
     token: varchar("token", { length: 255 }).notNull().unique(),
-    createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { fsp: 3 })
+    createdAt: timestamp("created_at", { mode: "date", precision: 3 }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date", precision: 3 })
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
     ipAddress: text("ip_address"),
@@ -54,7 +54,7 @@ export const session = mysqlTable(
   (table) => [index("session_userId_idx").on(table.userId)],
 );
 
-export const account = mysqlTable(
+export const account = pgTable(
   "account",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
@@ -66,27 +66,27 @@ export const account = mysqlTable(
     accessToken: text("access_token"),
     refreshToken: text("refresh_token"),
     idToken: text("id_token"),
-    accessTokenExpiresAt: timestamp("access_token_expires_at", { fsp: 3 }),
-    refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { fsp: 3 }),
+    accessTokenExpiresAt: timestamp("access_token_expires_at", { mode: "date", precision: 3 }),
+    refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { mode: "date", precision: 3 }),
     scope: text("scope"),
     password: text("password"),
-    createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { fsp: 3 })
+    createdAt: timestamp("created_at", { mode: "date", precision: 3 }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date", precision: 3 })
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
   (table) => [index("account_userId_idx").on(table.userId)],
 );
 
-export const verification = mysqlTable(
+export const verification = pgTable(
   "verification",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
     identifier: varchar("identifier", { length: 255 }).notNull(),
     value: text("value").notNull(),
-    expiresAt: timestamp("expires_at", { fsp: 3 }).notNull(),
-    createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { fsp: 3 })
+    expiresAt: timestamp("expires_at", { mode: "date", precision: 3 }).notNull(),
+    createdAt: timestamp("created_at", { mode: "date", precision: 3 }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date", precision: 3 })
       .defaultNow()
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
@@ -94,7 +94,7 @@ export const verification = mysqlTable(
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
-export const twoFactor = mysqlTable(
+export const twoFactor = pgTable(
   "two_factor",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
@@ -110,7 +110,7 @@ export const twoFactor = mysqlTable(
   ],
 );
 
-export const oauthApplication = mysqlTable(
+export const oauthApplication = pgTable(
   "oauth_application",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
@@ -125,20 +125,20 @@ export const oauthApplication = mysqlTable(
     userId: varchar("user_id", { length: 36 }).references(() => user.id, {
       onDelete: "cascade",
     }),
-    createdAt: timestamp("created_at", { fsp: 3 }),
-    updatedAt: timestamp("updated_at", { fsp: 3 }),
+    createdAt: timestamp("created_at", { mode: "date", precision: 3 }),
+    updatedAt: timestamp("updated_at", { mode: "date", precision: 3 }),
   },
   (table) => [index("oauthApplication_userId_idx").on(table.userId)],
 );
 
-export const oauthAccessToken = mysqlTable(
+export const oauthAccessToken = pgTable(
   "oauth_access_token",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
     accessToken: varchar("access_token", { length: 255 }).unique(),
     refreshToken: varchar("refresh_token", { length: 255 }).unique(),
-    accessTokenExpiresAt: timestamp("access_token_expires_at", { fsp: 3 }),
-    refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { fsp: 3 }),
+    accessTokenExpiresAt: timestamp("access_token_expires_at", { mode: "date", precision: 3 }),
+    refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { mode: "date", precision: 3 }),
     clientId: varchar("client_id", { length: 36 }).references(
       () => oauthApplication.clientId,
       { onDelete: "cascade" },
@@ -147,8 +147,8 @@ export const oauthAccessToken = mysqlTable(
       onDelete: "cascade",
     }),
     scopes: text("scopes"),
-    createdAt: timestamp("created_at", { fsp: 3 }),
-    updatedAt: timestamp("updated_at", { fsp: 3 }),
+    createdAt: timestamp("created_at", { mode: "date", precision: 3 }),
+    updatedAt: timestamp("updated_at", { mode: "date", precision: 3 }),
   },
   (table) => [
     index("oauthAccessToken_clientId_idx").on(table.clientId),
@@ -156,7 +156,7 @@ export const oauthAccessToken = mysqlTable(
   ],
 );
 
-export const oauthConsent = mysqlTable(
+export const oauthConsent = pgTable(
   "oauth_consent",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
@@ -168,8 +168,8 @@ export const oauthConsent = mysqlTable(
       onDelete: "cascade",
     }),
     scopes: text("scopes"),
-    createdAt: timestamp("created_at", { fsp: 3 }),
-    updatedAt: timestamp("updated_at", { fsp: 3 }),
+    createdAt: timestamp("created_at", { mode: "date", precision: 3 }),
+    updatedAt: timestamp("updated_at", { mode: "date", precision: 3 }),
     consentGiven: boolean("consent_given"),
   },
   (table) => [
@@ -178,20 +178,20 @@ export const oauthConsent = mysqlTable(
   ],
 );
 
-export const organization = mysqlTable(
+export const organization = pgTable(
   "organization",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
     name: varchar("name", { length: 255 }).notNull(),
     slug: varchar("slug", { length: 255 }).notNull().unique(),
     logo: text("logo"),
-    createdAt: timestamp("created_at", { fsp: 3 }).notNull(),
+    createdAt: timestamp("created_at", { mode: "date", precision: 3 }).notNull(),
     metadata: text("metadata"),
   },
   (table) => [uniqueIndex("organization_slug_uidx").on(table.slug)],
 );
 
-export const team = mysqlTable(
+export const team = pgTable(
   "team",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
@@ -199,15 +199,15 @@ export const team = mysqlTable(
     organizationId: varchar("organization_id", { length: 36 })
       .notNull()
       .references(() => organization.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at", { fsp: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { fsp: 3 }).$onUpdate(
+    createdAt: timestamp("created_at", { mode: "date", precision: 3 }).notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date", precision: 3 }).$onUpdate(
       () => /* @__PURE__ */ new Date(),
     ),
   },
   (table) => [index("team_organizationId_idx").on(table.organizationId)],
 );
 
-export const teamMember = mysqlTable(
+export const teamMember = pgTable(
   "team_member",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
@@ -217,7 +217,7 @@ export const teamMember = mysqlTable(
     userId: varchar("user_id", { length: 36 })
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at", { fsp: 3 }),
+    createdAt: timestamp("created_at", { mode: "date", precision: 3 }),
   },
   (table) => [
     index("teamMember_teamId_idx").on(table.teamId),
@@ -225,7 +225,7 @@ export const teamMember = mysqlTable(
   ],
 );
 
-export const member = mysqlTable(
+export const member = pgTable(
   "member",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
@@ -236,7 +236,7 @@ export const member = mysqlTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     role: varchar("role", { length: 255 }).default("member").notNull(),
-    createdAt: timestamp("created_at", { fsp: 3 }).notNull(),
+    createdAt: timestamp("created_at", { mode: "date", precision: 3 }).notNull(),
   },
   (table) => [
     index("member_organizationId_idx").on(table.organizationId),
@@ -244,7 +244,7 @@ export const member = mysqlTable(
   ],
 );
 
-export const invitation = mysqlTable(
+export const invitation = pgTable(
   "invitation",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
@@ -255,8 +255,8 @@ export const invitation = mysqlTable(
     role: varchar("role", { length: 255 }),
     teamId: varchar("team_id", { length: 255 }),
     status: varchar("status", { length: 255 }).default("pending").notNull(),
-    expiresAt: timestamp("expires_at", { fsp: 3 }).notNull(),
-    createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
+    expiresAt: timestamp("expires_at", { mode: "date", precision: 3 }).notNull(),
+    createdAt: timestamp("created_at", { mode: "date", precision: 3 }).defaultNow().notNull(),
     inviterId: varchar("inviter_id", { length: 36 })
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),

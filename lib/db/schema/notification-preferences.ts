@@ -1,8 +1,8 @@
-import { mysqlTable, varchar, boolean, timestamp, index } from "drizzle-orm/mysql-core";
+import { pgTable, varchar, boolean, timestamp, index } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 import { relations } from "drizzle-orm";
 
-export const notificationPreferences = mysqlTable(
+export const notificationPreferences = pgTable(
   "notification_preferences",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
@@ -20,7 +20,7 @@ export const notificationPreferences = mysqlTable(
     errorEnabled: boolean("error_enabled").default(true).notNull(),
     infoEnabled: boolean("info_enabled").default(true).notNull(),
     
-    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().$onUpdate(() => new Date()).notNull(),
   },
   (table) => [
     index("notification_preferences_userId_idx").on(table.userId),

@@ -1,13 +1,15 @@
-import mysql from "mysql2/promise";
+import pg from "pg";
 
-const connection = await mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "root",
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL?.replace(/\/simpbb_neo$/, "/postgres") || "postgresql://postgres:postgres@localhost:5432/postgres",
 });
 
-await connection.execute("DROP DATABASE IF EXISTS simpbb_neo");
-await connection.execute("CREATE DATABASE simpbb_neo");
-console.log("✅ Database dropped and recreated successfully!");
+try {
+  await pool.query("DROP DATABASE IF EXISTS simpbb_neo");
+  await pool.query("CREATE DATABASE simpbb_neo");
+  console.log("✅ Database dropped and recreated successfully!");
+} catch (error) {
+  console.error("Error resetting database:", error);
+}
 
-await connection.end();
+await pool.end();

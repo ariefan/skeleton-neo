@@ -13,31 +13,9 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import {
-  GalleryVerticalEndIcon,
-  LayoutDashboardIcon,
-  FileText,
-  Building2,
-  ClipboardList,
-  CreditCard,
-  Printer,
-  AlertTriangle,
-  Search,
-  BarChart3,
-  BookOpen,
-  Settings,
-  Users,
-  Shield,
-  Globe,
-  Map,
-  RefreshCw,
-  GitBranch,
-  ScrollText,
-  HardDrive,
-  Archive,
-} from "lucide-react"
+import { GalleryVerticalEndIcon, AudioLinesIcon, TerminalIcon, TerminalSquareIcon, BotIcon, BookOpenIcon, Settings2Icon, FrameIcon, PieChartIcon, MapIcon, DatabaseIcon, LayoutDashboardIcon, FileIcon, HardDrive, Archive } from "lucide-react"
 
-// This is sample data — should be replaced with Better Auth session data
+// This is sample data.
 const data = {
   user: {
     name: "shadcn",
@@ -46,116 +24,80 @@ const data = {
   },
   teams: [
     {
-      name: "SIM-PBB",
-      logo: <GalleryVerticalEndIcon />,
-      plan: "Bapenda",
+      name: "App 1",
+      logo: (
+        <GalleryVerticalEndIcon
+        />
+      ),
+      plan: "Kota ABC",
+    },
+    {
+      name: "App 2",
+      logo: (
+        <AudioLinesIcon
+        />
+      ),
+      plan: "Kota XXX",
+    },
+    {
+      name: "App 3",
+      logo: (
+        <TerminalIcon
+        />
+      ),
+      plan: "Kota XYZ",
     },
   ],
   navMain: [
     {
       title: "Dashboard",
       url: "/dashboard",
-      icon: <LayoutDashboardIcon />,
+      icon: (
+        <LayoutDashboardIcon
+        />
+      ),
     },
     {
-      title: "SPOP",
-      url: "/spop",
-      icon: <FileText />,
-    },
-    {
-      title: "LSPOP",
-      url: "/lspop",
-      icon: <Building2 />,
-    },
-    {
-      title: "Pelayanan",
-      url: "/pelayanan",
-      icon: <ClipboardList />,
-    },
-    {
-      title: "Pembayaran",
-      url: "/pembayaran",
-      icon: <CreditCard />,
-    },
-    {
-      title: "Cetak SPPT",
-      url: "/cetak-sppt",
-      icon: <Printer />,
-    },
-    {
-      title: "Tunggakan",
-      url: "/tunggakan",
-      icon: <AlertTriangle />,
-    },
-    {
-      title: "Info OP",
-      url: "/info-op",
-      icon: <Search />,
-    },
-    {
-      title: "Laporan",
-      url: "#",
-      icon: <BarChart3 />,
-      items: [
-        { title: "Pembayaran", url: "/laporan/pembayaran" },
-        { title: "Realisasi", url: "/laporan/realisasi" },
-        { title: "Tunggakan", url: "/laporan/tunggakan" },
-        { title: "Mutasi", url: "/laporan/mutasi" },
-        { title: "Penetapan", url: "/laporan/penetapan" },
-        { title: "Pengurangan", url: "/laporan/pengurangan" },
-        { title: "DHKP", url: "/laporan/dhkp" },
-      ],
-    },
-    {
-      title: "DHKP",
-      url: "/dhkp",
-      icon: <BookOpen />,
-    },
-    {
-      title: "Update Masal",
-      url: "/update-masal",
-      icon: <RefreshCw />,
-    },
-    {
-      title: "Pemekaran",
-      url: "/pemekaran",
-      icon: <GitBranch />,
-    },
-    {
-      title: "Peta",
-      url: "/peta",
-      icon: <Map />,
-    },
-    {
-      title: "Pengaturan",
-      url: "#",
-      icon: <Settings />,
-      items: [
-        { title: "Referensi Wilayah", url: "/pengaturan/referensi" },
-        { title: "Klasifikasi", url: "/pengaturan/klasifikasi" },
-        { title: "Tarif PBB", url: "/pengaturan/tarif" },
-        { title: "Jenis SPPT", url: "/pengaturan/jenis-sppt" },
-        { title: "Fasilitas", url: "/pengaturan/fasilitas" },
-        { title: "Jalan", url: "/pengaturan/jalan" },
-        { title: "Konfigurasi", url: "/pengaturan/konfigurasi" },
-        { title: "Pengguna", url: "/pengaturan/pengguna" },
-        { title: "Group Akses", url: "/pengaturan/group-akses" },
-      ],
-    },
-    {
-      title: "Log Aktivitas",
-      url: "/log",
-      icon: <ScrollText />,
+      title: "CRUD Example",
+      url: "/crud-example",
+      icon: (
+        <DatabaseIcon
+        />
+      ),
     },
     {
       title: "File Manager",
       url: "/file-manager",
-      icon: <HardDrive />,
+      icon: (
+        <HardDrive
+        />
+      ),
     },
     {
       title: "Backups",
       url: "/backups",
-      icon: <Archive />,
+      icon: (
+        <Archive
+        />
+      ),
+    },
+    {
+      title: "Menu",
+      url: "#",
+      icon: (
+        <TerminalSquareIcon
+        />
+      ),
+      items: [
+        {
+          title: "Sub Menu 1",
+          url: "#",
+        },
+        {
+          title: "Sub Menu 2",
+          url: "#",
+        },
+      ],
     },
   ],
 }
