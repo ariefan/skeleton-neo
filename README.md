@@ -8,7 +8,7 @@ A high-performance, type-safe Next.js boilerplate built for modern scale. Combin
 |----------|------------|
 | **Framework** | [Next.js 16](https://nextjs.org/) (App Router, Turbopack) |
 | **API Layer** | [oRPC v1.x](https://orpc.dev/) - Contract-first, fully type-safe RPC |
-| **Database** | [Drizzle ORM](https://orm.drizzle.team/) with MySQL |
+| **Database** | [Drizzle ORM](https://orm.drizzle.team/) with PostgreSQL |
 | **Authentication** | [Better Auth](https://www.better-auth.com/) |
 | **UI Components** | [shadcn/ui](https://ui.shadcn.com/) + Tailwind CSS 4 |
 | **State Management** | [TanStack Query v5](https://tanstack.com/query/latest) |
@@ -28,7 +28,7 @@ cp .env.local.example .env.local
 Edit `.env.local` with your credentials:
 
 ```env
-DATABASE_URL=mysql://user:password@localhost:3306/simpbb-neo
+DATABASE_URL=postgres://user:password@localhost:5432/simpbb-neo
 BETTER_AUTH_SECRET=your-secret-key-here
 BETTER_AUTH_URL=http://localhost:3000
 ```
@@ -186,9 +186,9 @@ const { data } = useQuery(orpc.myEndpoint.queryOptions({ input: { name: 'World' 
 1. Create schema in `lib/db/schema/`:
 
 ```typescript
-import { mysqlTable, serial, varchar } from "drizzle-orm/mysql-core"
+import { pgTable, serial, varchar } from "drizzle-orm/pg-core"
 
-export const myTable = mysqlTable("my_table", {
+export const myTable = pgTable("my_table", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
 })

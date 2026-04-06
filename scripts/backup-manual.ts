@@ -11,7 +11,7 @@
  *   BACKUP_ENABLED=true|false     - Enable/disable backup (default: true)
  *   BACKUP_RETENTION_DAYS=30      - Days to keep backups (default: 30)
  *   BACKUP_DIR=./backups          - Backup directory (default: ./backups)
- *   MYSQLDUMP_PATH=/path/to/mysqldump - Path to mysqldump binary
+ *   PGDUMP_PATH=/path/to/pg_dump - Path to pg_dump binary
  */
 
 import { config as dotenvConfig } from "dotenv"
