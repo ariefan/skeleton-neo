@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { StorageService } from "@/lib/services/storage"
 import { auth } from "@/lib/auth"
 import fs from "fs/promises"
+import path from "path"
 
 // Next.js Response can take a ReadableStream, a Buffer, or a string.
 // But simplest for local files is to read the buffer if they aren't huge, 
@@ -25,8 +26,14 @@ export async function GET(
 			return NextResponse.json({ error: "Invalid path" }, { status: 400 })
 		}
 
-		const diskPath = StorageService.getDiskPath(relativePath)
-		
+		const diskPath = path.resolve(StorageService.getDiskPath(relativePath))
+		const uploadsDir = path.resolve(StorageService.getDiskPath(""))
+
+		// Final security check: ensure the resolved path is still within the uploads directory
+		if (!diskPath.startsWith(uploadsDir + path.sep) && diskPath !== uploadsDir) {
+			return NextResponse.json({ error: "Invalid path" }, { status: 400 })
+		}
+
 		try {
 			const fileBuffer = await fs.readFile(diskPath)
 			const stats = await fs.stat(diskPath)

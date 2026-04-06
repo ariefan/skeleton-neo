@@ -25,8 +25,13 @@ export async function GET(
 			return NextResponse.json({ error: "Invalid backup file" }, { status: 400 })
 		}
 
-		const backupDir = process.env.BACKUP_DIR || path.join(process.cwd(), "backups")
-		const filePath = path.join(backupDir, filename)
+		const backupDir = path.resolve(process.env.BACKUP_DIR || path.join(process.cwd(), "backups"))
+		const filePath = path.resolve(backupDir, filename)
+
+		// Final security check: ensure the resolved path is still within the backup directory
+		if (!filePath.startsWith(backupDir + path.sep) && filePath !== backupDir) {
+			return NextResponse.json({ error: "Invalid filename" }, { status: 400 })
+		}
 
 		try {
 			const fileBuffer = await fs.readFile(filePath)
