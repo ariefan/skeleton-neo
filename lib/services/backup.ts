@@ -143,16 +143,22 @@ async function executeWithRetry(
 	// Get mysqldump path from env or use Linux default
 	const mysqldumpPath = process.env.MYSQLDUMP_PATH || "/usr/bin/mysqldump"
 
-	// Build command as a single string for shell execution (needed for Windows paths with spaces)
-	// Quote the path in case it contains spaces
-	const quotedPath = `"${mysqldumpPath}"`
-	const argsString = `-h${config.host} -P${config.port} -u${config.user} -p${config.password} --no-create-db --single-transaction --quick --lock-tables=false ${config.database}`
-	const command = `${quotedPath} ${argsString}`
+	const args = [
+		`-h${config.host}`,
+		`-P${config.port}`,
+		`-u${config.user}`,
+		`-p${config.password}`,
+		"--no-create-db",
+		"--single-transaction",
+		"--quick",
+		"--lock-tables=false",
+		config.database
+	]
 
 	return new Promise<void>((resolve, reject) => {
-		const mysqldump = spawn(command, {
+		const mysqldump = spawn(mysqldumpPath, args, {
 			stdio: ["ignore", "pipe", "pipe"],
-			shell: true,
+			shell: false,
 		})
 
 		const writeStream = fsSync.createWriteStream(outputPath)
