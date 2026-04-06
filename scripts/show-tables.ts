@@ -1,19 +1,20 @@
-import mysql from "mysql2/promise";
+import pg from "pg";
 
-const conn = await mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "root",
-  database: "simpbb_neo",
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/simpbb_neo",
 });
 
-const [tables] = await conn.query("SHOW TABLES");
-console.log("Tables:", JSON.stringify(tables, null, 2));
+const result = await pool.query(`
+  SELECT tablename
+  FROM pg_tables
+  WHERE schemaname = 'public';
+`);
+console.log("Tables:", JSON.stringify(result.rows, null, 2));
 
 // Also check for drizzle migration journal
-const [journal] = await conn.query(
-  "SELECT * FROM information_schema.tables WHERE table_schema = 'simpbb_neo' AND table_name LIKE '%drizzle%'"
+const journalResult = await pool.query(
+  "SELECT * FROM information_schema.tables WHERE table_schema = 'public' AND table_name LIKE '%drizzle%'"
 );
-console.log("Drizzle tables:", JSON.stringify(journal, null, 2));
+console.log("Drizzle tables:", JSON.stringify(journalResult.rows, null, 2));
 
-await conn.end();
+await pool.end();

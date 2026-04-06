@@ -1,8 +1,8 @@
-import { mysqlTable, varchar, text, timestamp, boolean, index } from "drizzle-orm/mysql-core";
+import { pgTable, varchar, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 import { relations } from "drizzle-orm";
 
-export const notifications = mysqlTable(
+export const notifications = pgTable(
   "notifications",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
